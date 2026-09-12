@@ -6495,9 +6495,10 @@ body.dark .author{background:#2c2a25;border-color:#3a3833}
       ub.addEventListener('click', tryUnlock);
       ui.addEventListener('keydown', function(e){ if(e.key==='Enter') tryUnlock(); });
 
-      // 未解锁时，点击左侧加密目录 → 跳转到解锁框
+      // 未解锁时，点击左侧加密目录 → 跳转到解锁框（已解锁则放行正常跳转）
       document.querySelectorAll('.sidebar a').forEach(function(a){
         a.addEventListener('click', function(e){
+          if (localStorage.getItem(UNLOCK_KEY) === '1') return;  // 已解锁，正常跳转
           var href = a.getAttribute('href');
           if (!href || href.charAt(0) !== '#') return;
           var tgt = document.getElementById(href.slice(1));
