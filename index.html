@@ -6494,6 +6494,20 @@ body.dark .author{background:#2c2a25;border-color:#3a3833}
       }
       ub.addEventListener('click', tryUnlock);
       ui.addEventListener('keydown', function(e){ if(e.key==='Enter') tryUnlock(); });
+
+      // 未解锁时，点击左侧加密目录 → 跳转到解锁框
+      document.querySelectorAll('.sidebar a').forEach(function(a){
+        a.addEventListener('click', function(e){
+          var href = a.getAttribute('href');
+          if (!href || href.charAt(0) !== '#') return;
+          var tgt = document.getElementById(href.slice(1));
+          if (tgt && lockedContent.contains(tgt)) {
+            e.preventDefault();
+            unlockBox.scrollIntoView({behavior:'smooth'});
+            setTimeout(function(){ ui.focus(); }, 450);
+          }
+        });
+      });
     }
   }
 })();
