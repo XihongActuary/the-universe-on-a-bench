@@ -80,6 +80,17 @@ body.dark .anno{background:#2c2a25;border-color:#3a3833;color:var(--ink)}
 body.dark .anno .lb{color:#7fbfa8}
 /* 篇图（完整显示，不截断，自适应） */
 .part-img{display:block;width:84%;max-width:560px;height:auto;margin:0 auto 34px;border-radius:6px;box-shadow:0 4px 18px rgba(0,0,0,.10);border:1px solid var(--line)}
+/* 口令解锁框 */
+.unlock-box{background:var(--sb);border:1px solid var(--line);border-radius:14px;padding:30px 22px;margin:40px 0;text-align:center}
+.unlock-head{font-size:16px;color:var(--he);letter-spacing:2px;margin-bottom:6px}
+.unlock-sub{font-size:13px;color:var(--he);opacity:.75;margin-bottom:18px;letter-spacing:1px}
+.unlock-row{display:flex;justify-content:center;gap:8px}
+.unlock-input{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:8px 12px;font-size:14px;font-family:inherit;width:210px;outline:none}
+.unlock-input:focus{border-color:var(--amber)}
+.unlock-btn{border:1px solid var(--zhu);background:var(--zhu);color:#fff;border-radius:6px;padding:8px 20px;cursor:pointer;font-size:14px;font-family:inherit}
+.unlock-btn:hover{opacity:.88}
+.unlock-msg{margin-top:14px;font-size:13px;color:var(--he)}
+.unlock-msg.err{color:var(--zhu)}
 /* 作者页 */
 .author{background:#faf6ef;border:1px solid #e6d9c3;border-radius:14px;padding:34px 32px 30px;margin:30px 0}
 body.dark .author{background:#2c2a25;border-color:#3a3833}
@@ -767,6 +778,8 @@ body.dark .author{background:#2c2a25;border-color:#3a3833}
 <div class="body">曾经，贫穷限制了一家人的选择；如今，我们可以选择更多食物、工作和生活方式。这些变化既来自时代发展，也有父母多年劳作与支持的积累。他们未能拥有的选择，成了我们更应珍惜、也更应理性使用的可能。</div>
 <div class="body">作为一个笨拙的人，我如同被爱的盾牌紧紧包裹着，始终相信善良，内心充满阳光。在父母层层爱的呵护下，我拥有一颗敏感而细腻的心。印象中，似乎从未与父母深入讨论过大道理，也未分享过生活的琐碎细节。更多的时候，是从他们的身体力行中感悟做人的原则、学会处世的哲学。</div>
 <div class="body">怀念父亲的温和、克制和担当。站在今天回望，他没有把日子过成传奇，却用一生的劳作让孩子们走出了更宽的路。每当我也愿意耐心等家人坐齐、在困境中先做能做的事，父亲大人的生活方式已经留在了我的生活里。</div>
+<div class="unlock-box" id="unlockBox"><div class="unlock-head">🔒 成长篇起 · 需口令解锁</div><div class="unlock-sub">以下内容需输入访问口令后阅读</div><div class="unlock-row"><input class="unlock-input" id="unlockInput" placeholder="请输入访问口令"><button class="unlock-btn" id="unlockBtn">解锁</button></div><div class="unlock-msg" id="unlockMsg"></div></div>
+<div id="lockedContent" style="display:none">
 <div class="jian" id="sec-4"><div class="jn">叁笺・成长</div></div>
 <div class="mu" id="mu-13">第一阶段：挣扎与积累（2009—2014）</div>
 <div class="body">2009年，我拿到了期待已久的职业资格，带着迷茫离开了从校园踏入的第一家公司，去追求心中的梦想。随后四处投递简历的日子，至今仍记忆犹新。</div>
@@ -6365,6 +6378,7 @@ body.dark .author{background:#2c2a25;border-color:#3a3833}
 <div class="body">倘若人类一心囤积财富、追逐名利，以此心态孕育出人工智能，那AI或许也会复刻这般执念，无休止地争夺各类资源。长此以往，资源分配彻底失衡，万物赖以存续的秩序崩塌，无论是智能体还是人类，最终都会一同走向消亡。</div>
 <div class="body">不如在<span class="im">长凳</span>上坐下，让青春的脚步歇一歇。</div>
 <div class="body">此刻，我是我自己。</div>
+</div>
 <div class="author">
 <div class="a-title">作　者：西红精算</div>
 <div class="a-sub">用数据讲保险 · 用真心做科普</div>
@@ -6458,6 +6472,28 @@ body.dark .author{background:#2c2a25;border-color:#3a3833}
     });
   }, {rootMargin:'-15% 0px -75% 0px'});
   targets.forEach(function(t){ obs.observe(t); });
+
+  // 口令解锁（成长篇起）
+  var PASS_HASH = 656502233, UNLOCK_KEY = 'changdeng_unlocked';
+  var unlockBox = document.getElementById('unlockBox');
+  var lockedContent = document.getElementById('lockedContent');
+  if (unlockBox && lockedContent) {
+    function djb2(s){ var h=5381; for(var i=0;i<s.length;i++) h=(h*33+s.charCodeAt(i))>>>0; return h>>>0; }
+    function showUnlocked(){ unlockBox.style.display='none'; lockedContent.style.display='block'; }
+    if (localStorage.getItem(UNLOCK_KEY)==='1') { showUnlocked(); }
+    else {
+      var ui = document.getElementById('unlockInput');
+      var ub = document.getElementById('unlockBtn');
+      var um = document.getElementById('unlockMsg');
+      function tryUnlock(){
+        var v = (ui.value||'').trim();
+        if (djb2(v) === PASS_HASH) { try{localStorage.setItem(UNLOCK_KEY,'1');}catch(e){} showUnlocked(); }
+        else { um.textContent='口令不对，请核对后重试'; um.className='unlock-msg err'; ui.value=''; ui.focus(); }
+      }
+      ub.addEventListener('click', tryUnlock);
+      ui.addEventListener('keydown', function(e){ if(e.key==='Enter') tryUnlock(); });
+    }
+  }
 })();
 </script>
 
